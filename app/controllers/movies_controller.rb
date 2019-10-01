@@ -3,6 +3,16 @@ class MoviesController < ApplicationController
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
+  
+  def all_ratings
+    hash = {}
+    @all_ratings.each { |val| hash[val] = '1' }
+    hash
+  end
+  
+  def with_ratings
+    @ratings
+  end
 
   def show
     id = params[:id] # retrieve movie ID from URI route
@@ -12,14 +22,10 @@ class MoviesController < ApplicationController
 
   def index
     @sort = params[:sort]
-    @movies = Movie.order(@sort)
-    
-    session[:sort] = @sort
-    
-    if params[:sort] != session[:sort]
-      flash.keep
-      redirect_to movies_path sort: @sort
-    end
+    @all_ratings = Movie.all_ratings
+    @ratings = params[:ratings] || all_ratings
+    @with_ratings = Movie.with_ratings(@ratings)
+    @movies = @with_ratings.order(@sort)
   end
 
   def new
