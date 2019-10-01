@@ -21,11 +21,18 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @sort = params[:sort]
-    @all_ratings = Movie.all_ratings
-    @ratings = params[:ratings] || all_ratings
+    @sort = params[:sort] || session[:sort]
+    @ratings = params[:ratings] || session[:ratings] || all_ratings
     @with_ratings = Movie.with_ratings(@ratings)
     @movies = @with_ratings.order(@sort)
+    @all_ratings = Movie.all_ratings
+    
+    session[:sort], session[:ratings] = @sort, @ratings
+    
+    if params[:sort] != session[:sort] or params[:ratings] != session[:ratings]
+      flash.keep
+      redirect_to movies_path sort: @sort, ratings: @ratings
+    end
   end
 
   def new
